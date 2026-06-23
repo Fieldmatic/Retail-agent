@@ -1,23 +1,17 @@
-import os
-
-from dotenv import load_dotenv
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import Field, ValidationError
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Settings(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+class Settings(BaseSettings):
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
 
-    google_api_key: str = Field(min_length=1)
-    gemini_model: str = "gemini-2.5-flash"
+    google_api_key: str = Field(alias="GOOGLE_API_KEY", min_length=1)
+    gemini_model: str = Field(default="gemini-2.5-flash-lite", alias="GEMINI_MODEL")
 
 
 def load_settings() -> Settings:
-    load_dotenv()
-
     try:
-        return Settings(
-            google_api_key=os.getenv("GOOGLE_API_KEY", ""),
-            gemini_model=os.getenv("GEMINI_MODEL", "gemini-2.5-flash"),
-        )
+        return Settings()
     except ValidationError as error:
-        raise RuntimeError("Set GOOGLE_API_KEY in .env before asking questions.") from error
+        fields = ", ".join(str(item["loc"][0]) for item in error.errors())
+        raise RuntimeError(f"Set required environment variables in .env: {fields}") from error

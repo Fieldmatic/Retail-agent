@@ -7,7 +7,7 @@ dependencies = [
     "langchain-google-genai>=4.2.5",
     "langgraph>=1.2.6",
     "pydantic>=2.13.4",
-    "python-dotenv>=1.2.2",
+    "pydantic-settings>=2.14.2",
 ]
 
 [dependency-groups]
