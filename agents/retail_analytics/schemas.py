@@ -1,6 +1,14 @@
-from typing import Any, Literal
+from enum import StrEnum
+from typing import Any
 
 from pydantic import BaseModel, ConfigDict
+
+
+class QueryStage(StrEnum):
+    PLANNING = "planning"
+    VALIDATION = "validation"
+    BIGQUERY = "bigquery"
+    EMPTY = "empty"
 
 
 class SqlPlan(BaseModel):
@@ -27,5 +35,5 @@ class QueryResult(BaseModel):
 class QueryError(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    stage: Literal["planning", "validation", "bigquery"]
+    stage: QueryStage
     message: str

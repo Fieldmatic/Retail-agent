@@ -1,10 +1,9 @@
 import sqlglot
-from langchain_core.tools import tool
 from sqlglot import exp
 from sqlglot.errors import SqlglotError
 
 from agents.retail_analytics.schemas import SqlValidationResult
-from agents.retail_analytics.tools.bigquery_client import ALLOWED_TABLE_NAMES, DATASET
+from agents.retail_analytics.services.bigquery_client import ALLOWED_TABLE_NAMES, DATASET
 
 
 def validate_sql(sql: str) -> SqlValidationResult:
@@ -39,9 +38,3 @@ def validate_sql(sql: str) -> SqlValidationResult:
         safe_sql = f"{safe_sql} LIMIT 100"
 
     return SqlValidationResult(valid=True, sql=safe_sql)
-
-
-@tool
-def validate_sql_tool(sql: str) -> SqlValidationResult:
-    """Validate generated BigQuery SQL before execution."""
-    return validate_sql(sql)

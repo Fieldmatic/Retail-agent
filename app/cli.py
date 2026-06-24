@@ -1,9 +1,7 @@
-# pyright: reportUnknownVariableType=false
-# -- langgraph's CompiledStateGraph is untyped
 from google.api_core.exceptions import ServiceUnavailable, TooManyRequests
 
 from agents.retail_analytics.graph import build_graph, stream_answer
-from agents.retail_analytics.tools.bigquery_client import BigQueryClient
+from agents.retail_analytics.services.bigquery_client import BigQueryClient
 from core.llm import build_llm
 from core.settings import load_settings
 

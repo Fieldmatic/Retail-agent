@@ -10,15 +10,15 @@ def build_llm(settings: Settings) -> ChatGoogleGenerativeAI:
             vertexai=True,
             project=settings.google_cloud_project,
             location=settings.vertex_ai_location,
-            request_timeout=20,
-            retries=1,
+            timeout=20,
+            max_retries=3,
             temperature=0,
         )
 
     return ChatGoogleGenerativeAI(
         api_key=settings.google_api_key,
         model=settings.gemini_model,
-        request_timeout=20,
-        retries=1,
+        timeout=20,
+        max_retries=3,
         temperature=0,
     )

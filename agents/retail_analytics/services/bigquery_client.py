@@ -1,5 +1,6 @@
 # pyright: reportUnknownArgumentType=false, reportUnknownMemberType=false, reportUnknownVariableType=false
 # -- google-cloud-bigquery Row objects expose dynamic, untyped attribute access
+from google.api_core.retry import Retry
 from google.cloud import bigquery
 
 from agents.retail_analytics.schemas import QueryResult
@@ -8,6 +9,8 @@ from core.settings import Settings
 DATASET = "bigquery-public-data.thelook_ecommerce"
 ALLOWED_TABLE_NAMES = {"orders", "order_items", "products", "users"}
 
+TRANSIENT_RETRY = Retry(initial=0.5, maximum=4.0, multiplier=2.0, timeout=10.0)
+
 
 class BigQueryClient:
     def __init__(self, settings: Settings) -> None:
@@ -15,23 +18,11 @@ class BigQueryClient:
         self.max_bytes_billed = settings.bigquery_max_bytes_billed
 
     def schema_context(self) -> str:
-        table_names = ", ".join(f"'{table}'" for table in sorted(ALLOWED_TABLE_NAMES))
-        sql = f"""
-            SELECT table_name, column_name, data_type
-            FROM `{DATASET}.INFORMATION_SCHEMA.COLUMNS`
-            WHERE table_name IN ({table_names})
-            ORDER BY table_name, ordinal_position
-        """
-
-        columns_by_table: dict[str, list[str]] = {}
-        for row in self.client.query(sql).result():
-            columns_by_table.setdefault(row.table_name, []).append(
-                f"{row.column_name} {row.data_type}"
-            )
-
         lines = [f"Dataset: `{DATASET}`", "Tables:"]
-        for table_name, columns in columns_by_table.items():
-            lines.append(f"- {table_name}({', '.join(columns)})")
+        for table_name in sorted(ALLOWED_TABLE_NAMES):
+            table = self.client.get_table(f"{DATASET}.{table_name}", retry=TRANSIENT_RETRY)
+            columns = ", ".join(f"{field.name} {field.field_type}" for field in table.schema)
+            lines.append(f"- {table_name}({columns})")
         return "\n".join(lines)
 
     def dry_run(self, sql: str) -> int:
@@ -42,6 +33,7 @@ class BigQueryClient:
                 use_query_cache=False,
                 maximum_bytes_billed=self.max_bytes_billed,
             ),
+            retry=TRANSIENT_RETRY,
         )
         return job.total_bytes_processed or 0
 
@@ -50,6 +42,7 @@ class BigQueryClient:
         job = self.client.query(
             sql,
             job_config=bigquery.QueryJobConfig(maximum_bytes_billed=self.max_bytes_billed),
+            retry=TRANSIENT_RETRY,
         )
         return QueryResult(
             rows=[dict(row) for row in job.result()], bytes_processed=bytes_processed
