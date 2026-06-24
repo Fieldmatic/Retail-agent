@@ -9,6 +9,7 @@ start:
 
 check:
 	uv run ruff check .
+	uv run pyright
 
 format:
 	uv run ruff check . --fix

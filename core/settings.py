@@ -10,6 +10,10 @@ class Settings(BaseSettings):
     use_vertex_ai: bool = Field(default=False, alias="USE_VERTEX_AI")
     vertex_ai_location: str = Field(default="us-central1", alias="VERTEX_AI_LOCATION")
     google_cloud_project: str | None = Field(default=None, alias="GOOGLE_CLOUD_PROJECT")
+    bigquery_max_bytes_billed: int = Field(
+        default=1_000_000_000,
+        alias="BIGQUERY_MAX_BYTES_BILLED",
+    )
 
     @field_validator("google_cloud_project", mode="before")
     @classmethod
