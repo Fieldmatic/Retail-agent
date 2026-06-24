@@ -12,7 +12,10 @@ Add your Gemini API key to `.env`:
 
 ```env
 GOOGLE_API_KEY=
-GEMINI_MODEL=gemini-2.5-flash-lite
+GEMINI_MODEL=gemini-2.5-flash
+USE_VERTEX_AI=false
+VERTEX_AI_LOCATION=us-central1
+GOOGLE_CLOUD_PROJECT=
 ```
 
 ## Run
