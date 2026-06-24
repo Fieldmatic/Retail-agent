@@ -3,11 +3,16 @@ from typing import cast
 
 from langchain_core.language_models.chat_models import BaseChatModel
 
-from agents.retail_analytics.prompts import REPORT_SYSTEM_PROMPT
+from agents.retail_analytics.prompts import (
+    CLASSIFIER_SYSTEM_PROMPT,
+    REFUSAL_MESSAGE,
+    REPORT_SYSTEM_PROMPT,
+)
 from agents.retail_analytics.schemas import (
     QueryError,
     QueryResult,
     QueryStage,
+    RequestClassification,
     SqlPlan,
 )
 from agents.retail_analytics.services.bigquery_client import BigQueryClient
@@ -15,11 +20,31 @@ from agents.retail_analytics.services.pii_masker import redact_pii
 from agents.retail_analytics.services.sql_validator import validate_sql
 from agents.retail_analytics.state import (
     AnswerUpdate,
+    ClassificationUpdate,
     QueryUpdate,
     RetailAgentState,
     SqlPlannerUpdate,
     ValidationUpdate,
 )
+
+
+def build_classifier_node(
+    llm: BaseChatModel,
+) -> Callable[[RetailAgentState], ClassificationUpdate]:
+    classifier = llm.with_structured_output(RequestClassification)
+
+    def node(state: RetailAgentState) -> ClassificationUpdate:
+        result = cast(
+            RequestClassification,
+            classifier.invoke([("system", CLASSIFIER_SYSTEM_PROMPT), ("human", state.question)]),
+        )
+        return {"category": result.category}
+
+    return node
+
+
+def refuse_node(state: RetailAgentState) -> AnswerUpdate:
+    return {"answer": REFUSAL_MESSAGE}
 
 
 def build_sql_planner_node(

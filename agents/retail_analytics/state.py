@@ -2,19 +2,29 @@ from typing import TypedDict
 
 from pydantic import BaseModel, ConfigDict
 
-from agents.retail_analytics.schemas import QueryError, QueryResult, SqlPlan
+from agents.retail_analytics.schemas import (
+    QueryError,
+    QueryResult,
+    RequestCategory,
+    SqlPlan,
+)
 
 
 class RetailAgentState(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     question: str
+    category: RequestCategory | None = None
     attempts: int = 0
     sql_plan: SqlPlan | None = None
     validated_sql: str | None = None
     query_result: QueryResult | None = None
     error: QueryError | None = None
     answer: str | None = None
+
+
+class ClassificationUpdate(TypedDict):
+    category: RequestCategory
 
 
 class SqlPlannerUpdate(TypedDict):

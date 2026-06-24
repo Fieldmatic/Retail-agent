@@ -11,6 +11,17 @@ class QueryStage(StrEnum):
     EMPTY = "empty"
 
 
+class RequestCategory(StrEnum):
+    ANALYTICS = "analytics"
+    OFF_TOPIC = "off_topic"
+
+
+class RequestClassification(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    category: RequestCategory
+
+
 class SqlPlan(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

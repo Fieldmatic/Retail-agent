@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from agents.retail_analytics.schemas import QueryStage
+from agents.retail_analytics.schemas import QueryStage, RequestCategory
 from agents.retail_analytics.state import RetailAgentState
 
 MAX_ATTEMPTS = 3
@@ -11,6 +11,10 @@ class QueryExecutionRoute(StrEnum):
     RETRY = "retry"
     FAIL = "fail"
     REPORT = "report"
+
+
+def route_after_classification(state: RetailAgentState) -> RequestCategory:
+    return state.category or RequestCategory.ANALYTICS
 
 
 def route_after_validation(state: RetailAgentState) -> QueryExecutionRoute:
