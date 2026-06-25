@@ -1,6 +1,7 @@
 from google.api_core.exceptions import ServiceUnavailable, TooManyRequests
 
-from agents.retail_analytics.graph import build_graph, stream_answer
+from agents.retail_analytics.graph import answer_question, build_graph
+from agents.retail_analytics.messages import REQUEST_FAILED_MESSAGE
 from agents.retail_analytics.services.bigquery_client import BigQueryClient
 from core.llm import build_llm
 from core.settings import load_settings
@@ -17,7 +18,7 @@ def format_request_error(error: Exception) -> str:
         return RATE_LIMIT_MESSAGE
     if isinstance(error, ServiceUnavailable) or "503" in message or "UNAVAILABLE" in message:
         return PROVIDER_UNAVAILABLE_MESSAGE
-    return f"Request failed: {message}"
+    return REQUEST_FAILED_MESSAGE
 
 
 def main() -> None:
@@ -39,14 +40,12 @@ def main() -> None:
         if not question:
             continue
 
-        print("\nAssistant: ", end="", flush=True)
+        print("\nAnalyzing…", flush=True)
         try:
-            for content in stream_answer(graph, question):
-                print(content, end="", flush=True)
+            answer = answer_question(graph, question)
         except Exception as error:
-            print(format_request_error(error), end="", flush=True)
-
-        print()
+            answer = format_request_error(error)
+        print(f"\nAssistant: {answer}")
 
 
 if __name__ == "__main__":
