@@ -18,7 +18,7 @@ from agents.retail_analytics.services.bigquery_client import BigQueryClient
 from agents.retail_analytics.state import AnswerUpdate, ClassificationUpdate, RetailAgentState
 from agents.retail_analytics.tools import build_tools
 
-RECURSION_LIMIT = 25
+RECURSION_LIMIT = 10
 CLI_THREAD_ID = "cli-session"
 
 
