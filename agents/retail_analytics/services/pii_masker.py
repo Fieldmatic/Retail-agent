@@ -9,8 +9,6 @@ PHONE_RE = re.compile(
 SENSITIVE_COLUMNS = {
     "email",
     "phone",
-    "first_name",
-    "last_name",
     "street_address",
     "latitude",
     "longitude",
